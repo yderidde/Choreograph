@@ -29,6 +29,9 @@
 #include "Motion.h"
 #include "Cue.h"
 
+#include <mutex>
+#include <atomic>
+
 namespace choreograph
 {
 
@@ -147,6 +150,7 @@ private:
 class Timeline
 {
 public:
+  Timeline();
   //=================================================
   // Creating Motions. Output<T>* Versions
   //=================================================
@@ -248,9 +252,13 @@ private:
 
   // queue to make adding cues from callbacks safe. Used if modifying functions are called during update loop.
   std::vector<TimelineItemUniqueRef>  _queue;
-  bool                                _updating = false;
+  std::atomic_bool                    _updating;
+
+  std::mutex                          _queue_mutex;
+  std::mutex                          _item_mutex;
 
   // Remove any motions that have stale pointers or that have completed playing.
+  // Called within update while mutex is locked.
   void removeFinishedAndInvalidMotions();
  
   // Move any items in the queue to our active items collection.

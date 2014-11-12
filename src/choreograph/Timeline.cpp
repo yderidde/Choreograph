@@ -30,6 +30,10 @@
 
 using namespace choreograph;
 
+Timeline::Timeline():
+  _updating( false )
+{}
+
 void Timeline::removeFinishedAndInvalidMotions()
 {
   detail::erase_if( &_items, [] ( const TimelineItemUniqueRef &motion ) { return (motion->getRemoveOnFinish() && motion->isFinished()) || motion->isInvalid(); } );
@@ -37,28 +41,36 @@ void Timeline::removeFinishedAndInvalidMotions()
 
 void Timeline::step( Time dt )
 {
-  // Update all animation outputs.
-  _updating = true;
-  for( auto &c : _items ) {
-    c->step( dt );
-  }
-  _updating = false;
+  { // update all items
+    std::lock_guard<std::mutex> lock( _item_mutex );
+    _updating = true;
 
-  removeFinishedAndInvalidMotions();
+    // Update all animation outputs.
+    for( auto &c : _items ) {
+      c->step( dt );
+    }
+    _updating = false;
+
+    removeFinishedAndInvalidMotions();
+  }
 
   processQueue();
 }
 
 void Timeline::jumpTo( Time time )
 {
-  // Update all animation outputs.
-  _updating = true;
-  for( auto &c : _items ) {
-    c->jumpTo( time );
-  }
-  _updating = false;
+  { // update all items
+    std::lock_guard<std::mutex> lock( _item_mutex );
+    _updating = true;
 
-  removeFinishedAndInvalidMotions();
+    // Update all animation outputs.
+    for( auto &c : _items ) {
+      c->jumpTo( time );
+    }
+    _updating = false;
+
+    removeFinishedAndInvalidMotions();
+  }
 
   processQueue();
 }
@@ -75,7 +87,10 @@ Time Timeline::calcDuration() const
 void Timeline::processQueue()
 {
   using namespace std;
-  std::copy( make_move_iterator( _queue.begin() ), make_move_iterator( _queue.end() ), back_inserter( _items ) );
+  lock_guard<mutex> queue_lock( _queue_mutex );
+  lock_guard<mutex> item_lock( _item_mutex );
+
+  copy( make_move_iterator( _queue.begin() ), make_move_iterator( _queue.end() ), back_inserter( _items ) );
   _queue.clear();
 }
 
@@ -89,9 +104,11 @@ void Timeline::add( TimelineItemUniqueRef item )
   item->setRemoveOnFinish( _default_remove_on_finish );
 
   if( _updating ) {
+    std::lock_guard<std::mutex> lock( _queue_mutex );
     _queue.emplace_back( std::move( item ) );
   }
   else {
+    std::lock_guard<std::mutex> lock( _item_mutex );
     _items.emplace_back( std::move( item ) );
   }
 }
