@@ -161,13 +161,13 @@ public:
 
 private:
   // True if Motions should be removed from timeline when they reach their endTime.
-  bool                                _default_remove_on_finish = true;
+  bool                          _default_remove_on_finish = true;
   std::vector<TimelineItemRef>  _items;
 
   // queue to make adding cues from callbacks safe. Used if modifying functions are called during update loop.
   std::vector<TimelineItemRef>  _queue;
-  bool                                _updating = false;
-  std::function<void ()>              _finish_fn = nullptr;
+  bool                          _updating = false;
+  std::function<void ()>        _finish_fn = nullptr;
 
 
   // Clean up finished motions and add queued motions after update.
@@ -198,10 +198,10 @@ private:
 template<typename T>
 MotionOptions<T> Timeline::apply( Output<T> *output )
 {
-  auto motion = detail::make_unique<Motion<T>>( output );
+  auto motion = std::make_shared<Motion<T>>( output );
 
   auto &motion_ref = *motion;
-  add( std::move( motion ) );
+  add( motion );
 
   return MotionOptions<T>( motion_ref, motion_ref.getSequence(), *this );
 }
@@ -209,10 +209,10 @@ MotionOptions<T> Timeline::apply( Output<T> *output )
 template<typename T>
 MotionOptions<T> Timeline::apply( Output<T> *output, const PhraseRef<T> &phrase )
 {
-  auto motion = detail::make_unique<Motion<T>>( output, Sequence<T>( phrase ) );
+  auto motion = std::make_shared<Motion<T>>( output, Sequence<T>( phrase ) );
 
   auto &motion_ref = *motion;
-  add( std::move( motion ) );
+  add( motion );
 
   return MotionOptions<T>( motion_ref, motion_ref.getSequence(), *this );
 }
@@ -220,10 +220,10 @@ MotionOptions<T> Timeline::apply( Output<T> *output, const PhraseRef<T> &phrase 
 template<typename T>
 MotionOptions<T> Timeline::apply( Output<T> *output, const Sequence<T> &sequence )
 {
-  auto motion = detail::make_unique<Motion<T>>( output, sequence );
+  auto motion = std::make_shared<Motion<T>>( output, sequence );
 
   auto &motion_ref = *motion;
-  add( std::move( motion ) );
+  add( motion );
 
   return MotionOptions<T>( motion_ref, motion_ref.getSequence(), *this );
 }
@@ -244,10 +244,10 @@ MotionOptions<T> Timeline::applyRaw( T *output )
   // This is a raw pointer, so we don't know about any prior relationships.
   cancel( output );
 
-  auto motion = detail::make_unique<Motion<T>>( output );
+  auto motion = std::make_shared<Motion<T>>( output );
 
   auto &m = *motion;
-  add( std::move( motion ) );
+  add( motion );
 
   return MotionOptions<T>( m, m.getSequence(), *this );
 }
@@ -256,10 +256,10 @@ template<typename T>
 MotionOptions<T> Timeline::applyRaw( T *output, const Sequence<T> &sequence )
 { // Remove any existing motions that affect the same variable.
   cancel( output );
-  auto motion = detail::make_unique<Motion<T>>( output, sequence );
+  auto motion = std::make_shared<Motion<T>>( output, sequence );
 
   auto &m = *motion;
-  add( std::move( motion ) );
+  add( motion );
 
   return MotionOptions<T>( m, m.getSequence(), *this );
 }
