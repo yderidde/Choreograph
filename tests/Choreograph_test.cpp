@@ -269,6 +269,7 @@ TEST_CASE( "Motions" )
 TEST_CASE( "Motion Groups" )
 {
   auto group = std::make_shared<Timeline>();
+  group->setDefaultRemoveOnFinish( false );
   auto &group_timeline = *group;
   Output<int> target = 0;
   Timeline timeline;
@@ -319,18 +320,18 @@ TEST_CASE( "Motion Groups" )
         group->resetTime();
       } );
       timeline.setDefaultRemoveOnFinish( false );
-      timeline.add( std::move( group ) );
+      timeline.add( group );
 
       for( int i = 0; i < 32; i += 1 ) {
         timeline.step( 0.1f );
       }
 
       REQUIRE( start_count == 4 );
-      REQUIRE( finish_count == 3 );
       REQUIRE( update_count == 32 );
+      REQUIRE( finish_count == 3 );
     }
 
-    SECTION( "Ping-pong looping group works, too." )
+    SECTION( "Ping-pong looping a group works, too." )
     {
       group->setFinishFn( [group] () {
         // MotionGroup overrides customSetPlaybackSpeed to inform children.
@@ -344,9 +345,11 @@ TEST_CASE( "Motion Groups" )
         timeline.step( 0.1f );
       }
 
-      REQUIRE( start_count == 4 );
-      REQUIRE( finish_count == 3 );
+      // We only pass the start and finish of our motion going forward twice.
+      // We also pass them each going backward, but that doesn't trigger our functions.
+      REQUIRE( start_count == 2 );
       REQUIRE( update_count == 32 );
+      REQUIRE( finish_count == 2 );
     }
 
   }
@@ -794,11 +797,11 @@ TEST_CASE( "Callbacks" )
     }
   }
 
-  SECTION( "It is safe to destroy a Timeline from the Timeline finish fn." )
+  SECTION( "It is safe to destroy a Timeline from its clearFn." )
   {
     auto self_destructing_timeline = detail::make_unique<Timeline>();
     self_destructing_timeline->apply( &target, sequence );
-    self_destructing_timeline->setFinishFn( [&self_destructing_timeline] {
+    self_destructing_timeline->setClearedFn( [&self_destructing_timeline] {
       self_destructing_timeline.reset();
     } );
 
