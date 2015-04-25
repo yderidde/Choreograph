@@ -41,8 +41,6 @@ namespace choreograph
 /// Additionally, Motions can be cancelled by disconnecting their Output<T>.
 /// Public methods are safe to call from cues and motion callbacks unless otherwise noted.
 ///
-/// Timelines are move-only because they contain unique_ptrs.
-///
 class Timeline
 {
 public:
@@ -81,7 +79,7 @@ public:
 
   /// Add an item to the timeline. Called by append/apply/cue methods.
   /// Use to pass in MotionGroups and other types that Timeline doesn't create.
-  void add( TimelineItemUniqueRef item );
+  void add( const TimelineItemRef &item );
 
   /// Add a timeline to the timeline.
   /// Wraps the timeline in a MotionGroup item.
@@ -156,18 +154,18 @@ public:
   template<typename T>
   MotionOptions<T> appendRaw( T *output );
 
-  std::vector<TimelineItemUniqueRef>::iterator begin() { return _items.begin(); }
-  std::vector<TimelineItemUniqueRef>::iterator end( ) { return _items.end( ); }
-  std::vector<TimelineItemUniqueRef>::const_iterator begin( ) const { return _items.cbegin( ); }
-  std::vector<TimelineItemUniqueRef>::const_iterator end( ) const { return _items.cend( ); }
+  std::vector<TimelineItemRef>::iterator begin() { return _items.begin(); }
+  std::vector<TimelineItemRef>::iterator end( ) { return _items.end( ); }
+  std::vector<TimelineItemRef>::const_iterator begin( ) const { return _items.cbegin( ); }
+  std::vector<TimelineItemRef>::const_iterator end( ) const { return _items.cend( ); }
 
 private:
   // True if Motions should be removed from timeline when they reach their endTime.
   bool                                _default_remove_on_finish = true;
-  std::vector<TimelineItemUniqueRef>  _items;
+  std::vector<TimelineItemRef>  _items;
 
   // queue to make adding cues from callbacks safe. Used if modifying functions are called during update loop.
-  std::vector<TimelineItemUniqueRef>  _queue;
+  std::vector<TimelineItemRef>  _queue;
   bool                                _updating = false;
   std::function<void ()>              _finish_fn = nullptr;
 

@@ -41,7 +41,7 @@ _finish_fn( std::move( rhs._finish_fn ) )
 
 void Timeline::removeFinishedAndInvalidMotions()
 {
-  detail::erase_if( &_items, [] ( const TimelineItemUniqueRef &motion ) { return (motion->getRemoveOnFinish() && motion->isFinished()) || motion->cancelled(); } );
+  detail::erase_if( &_items, [] ( const TimelineItemRef &motion ) { return (motion->getRemoveOnFinish() && motion->isFinished()) || motion->cancelled(); } );
 }
 
 void Timeline::step( Time dt )
@@ -128,7 +128,7 @@ void Timeline::cancel( void *output )
   }
 }
 
-void Timeline::add( TimelineItemUniqueRef item )
+void Timeline::add( const TimelineItemRef &item )
 {
   item->setRemoveOnFinish( _default_remove_on_finish );
 
