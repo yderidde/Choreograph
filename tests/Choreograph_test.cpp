@@ -1,7 +1,7 @@
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
-#include "choreograph/Choreograph.h"
+#include "choreograph/Choreograph.hpp"
 #include <array>
 
 // If true, will test vec2 and vec3 animation.

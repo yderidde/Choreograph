@@ -25,10 +25,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimelineItem.h"
-
-using namespace choreograph;
-
 Control::Control( TimelineItem *item ):
   _item( item )
 {}

@@ -25,16 +25,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Cue.h"
-
-using namespace choreograph;
-using namespace std;
-
-//=================================================
-// Cue
-//=================================================
-
-Cue::Cue( const function<void ()> &fn, Time delay ):
+Cue::Cue( const std::function<void ()> &fn, Time delay ):
 _cue( fn )
 {
   setStartTime( delay );

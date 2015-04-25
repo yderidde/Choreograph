@@ -25,13 +25,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Timeline.h"
-#include "detail/VectorManipulation.hpp"
-#include "MotionGroup.h"
-
-using namespace choreograph;
-
-Timeline::Timeline( Timeline &&rhs )
+inline Timeline::Timeline( Timeline &&rhs )
 : _default_remove_on_finish( std::move( rhs._default_remove_on_finish ) ),
 _items( std::move( rhs._items ) ),
 _queue( std::move( rhs._queue ) ),
@@ -39,12 +33,12 @@ _updating( std::move( rhs._updating ) ),
 _finish_fn( std::move( rhs._finish_fn ) )
 {}
 
-void Timeline::removeFinishedAndInvalidMotions()
+inline void Timeline::removeFinishedAndInvalidMotions()
 {
   detail::erase_if( &_items, [] ( const TimelineItemUniqueRef &motion ) { return (motion->getRemoveOnFinish() && motion->isFinished()) || motion->cancelled(); } );
 }
 
-void Timeline::step( Time dt )
+inline void Timeline::step( Time dt )
 {
   // Update all animation outputs.
   _updating = true;
@@ -56,7 +50,7 @@ void Timeline::step( Time dt )
   postUpdate();
 }
 
-void Timeline::jumpTo( Time time )
+inline void Timeline::jumpTo( Time time )
 {
   // Update all animation outputs.
   _updating = true;
@@ -68,7 +62,7 @@ void Timeline::jumpTo( Time time )
   postUpdate();
 }
 
-void Timeline::postUpdate()
+inline void Timeline::postUpdate()
 {
   bool was_empty = empty();
 
@@ -88,7 +82,7 @@ void Timeline::postUpdate()
   }
 }
 
-Time Timeline::timeUntilFinish() const
+inline Time Timeline::timeUntilFinish() const
 {
   Time end = 0;
   for( auto &item : _items ) {
@@ -97,7 +91,7 @@ Time Timeline::timeUntilFinish() const
   return end;
 }
 
-Time Timeline::getDuration() const
+inline Time Timeline::getDuration() const
 {
   Time duration = 0;
   for( auto &item : _items ) {
@@ -106,14 +100,14 @@ Time Timeline::getDuration() const
   return duration;
 }
 
-void Timeline::processQueue()
+inline void Timeline::processQueue()
 {
   using namespace std;
   std::copy( make_move_iterator( _queue.begin() ), make_move_iterator( _queue.end() ), back_inserter( _items ) );
   _queue.clear();
 }
 
-void Timeline::cancel( void *output )
+inline void Timeline::cancel( void *output )
 {
   for( auto &item : _items ) {
     if( item->getTarget() == output ) {
@@ -128,7 +122,7 @@ void Timeline::cancel( void *output )
   }
 }
 
-void Timeline::add( TimelineItemUniqueRef item )
+inline void Timeline::add( TimelineItemUniqueRef item )
 {
   item->setRemoveOnFinish( _default_remove_on_finish );
 
@@ -140,12 +134,12 @@ void Timeline::add( TimelineItemUniqueRef item )
   }
 }
 
-void Timeline::add( Timeline &&timeline )
+inline void Timeline::add( Timeline &&timeline )
 {
   add( std::move( detail::make_unique<MotionGroup>( std::move( timeline ) ) ) );
 }
 
-TimelineOptions Timeline::cue( const std::function<void ()> &fn, Time delay )
+inline TimelineOptions Timeline::cue( const std::function<void ()> &fn, Time delay )
 {
   auto cue = detail::make_unique<Cue>( fn, delay );
   TimelineOptions options( *cue );

@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "TimeType.h"
+#include "TimeType.hpp"
 
 namespace choreograph
 {

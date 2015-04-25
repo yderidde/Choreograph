@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "TimelineItem.h"
+#include "TimelineItem.hpp"
 #include "Sequence.hpp"
 #include "Output.hpp"
 #include "detail/VectorManipulation.hpp"

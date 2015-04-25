@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "Timeline.h"
+#include "Timeline.hpp"
 
 namespace choreograph
 {
@@ -99,5 +99,7 @@ public:
 private:
   MotionGroup &_group;
 };
+
+#include "detail/MotionGroup.inl"
 
 } // namespace choreograph

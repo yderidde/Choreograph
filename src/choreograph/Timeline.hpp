@@ -28,6 +28,8 @@
 #pragma once
 
 #include "TimelineOptions.hpp"
+#include "VectorManipulation.hpp"
+#include "MotionGroup.hpp"
 #include "detail/MakeUnique.hpp"
 
 namespace choreograph
@@ -286,5 +288,7 @@ Motion<T>* Timeline::find( T *output ) const
   }
   return nullptr;
 }
+
+#include "detail/Timeline.inl"
 
 } // namespace choreograph
