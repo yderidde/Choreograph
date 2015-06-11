@@ -87,14 +87,16 @@ public:
   inline Time normalizeTime( Time t ) const { return t / _duration; }
 
   /// Returns the duration of this source.
-  inline Time getDuration() const { return _duration; }
+  virtual Time getDuration() const { return _duration; }
+  virtual void setDuration(Time duration) { _duration = duration; }
 
   /// Returns the Phrase value at \a time, looping past the end from inflection point to the end.
   /// Relies on the subclass implementation of getValue( t ).
   T getValueWrapped( Time time, Time inflectionPoint = 0.0f ) const { return getValue( wrapTime( time, getDuration(), inflectionPoint ) ); }
 
+
 private:
-  const Time _duration = 0;
+  Time _duration = 0;
 };
 
 } // namespace choreograph

@@ -56,6 +56,8 @@ public:
   {
     return _value;
   }
+    
+  void setValue( const T &value ) { _value = value; }
 
 private:
   T       _value;

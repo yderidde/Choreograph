@@ -37,6 +37,23 @@
 
 namespace choreograph
 {
+    template<typename T>
+    class LoopPhrase;
+    
+    template<typename T>
+    class PingPongPhrase;
+    
+    template<typename T>
+    class ClipPhrase;
+    
+    template<typename T>
+    using LoopPhraseRef = std::shared_ptr<LoopPhrase<T>>;
+    
+    template<typename T>
+    using PingPongPhraseRef = std::shared_ptr<PingPongPhrase<T>>;
+    
+    template<typename T>
+    using ClipPhraseRef = std::shared_ptr<ClipPhrase<T>>;
 
 ///
 /// LoopPhrase repeats an existing Phrase N times.
@@ -127,10 +144,35 @@ public:
     _begin( begin ),
     _end( end ),
     _source( source )
-  {}
+  {
+  
+  }
 
   T getValue( Time atTime ) const override { return _source->getValue( clampTime( _begin + atTime ) ); }
 
+  const PhraseRef<T> getSource() const { return _source; }
+    
+  const PhraseRef<T> getOriginalPhraseRef() const {
+      auto parent = _source;
+      while(std::shared_ptr<ClipPhrase<T>> clip = std::dynamic_pointer_cast<ClipPhrase<T>>(parent))
+      {
+          parent = clip->getSource();
+      }
+      
+      return parent;
+  }
+    
+  void setClipTime(Time begin, Time end) {
+      _begin = begin;
+      _end = end;
+      
+      //invalidate duration
+      Phrase<T>::setDuration(end - begin);
+  }
+    
+  Time getClipBeginTime() { return _begin; }
+  Time getClipEndTime() { return _end; }
+    
   Time clampTime( Time t ) const { return std::min( std::min( t, _source->getDuration() ), _end ); }
 private:
   PhraseRef<T>  _source;

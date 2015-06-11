@@ -143,6 +143,9 @@ public:
   /// If the time is past duration, returns the last phrase in the Sequence.
   /// If there are no phrases in the sequence, behavior is undefined (asserts in debug builds).
   PhraseRef<T> getPhraseAtTime( Time time );
+    
+    size_t getPhraseIndex(const PhraseRef<T> &phrase) const;
+    
 
   //
   // Phrase<T> Equivalents.
@@ -258,6 +261,19 @@ PhraseRef<T> Sequence<T>::getPhraseAtTime( Time time )
 
   // Should be unreachable.
   return _phrases.back();
+}
+
+template<typename T>
+size_t Sequence<T>::getPhraseIndex(const PhraseRef<T> &phrase) const
+{
+    auto it = std::find(_phrases.begin(), _phrases.end(), phrase);
+    if (it == _phrases.end())
+    {
+        return 0;
+        // name not in vector
+    }
+    
+    return std::distance(_phrases.begin(), it);
 }
 
 template<typename T>
